@@ -193,9 +193,9 @@ onMounted(async () => {
   font-size: min(40vh, 25vw);
 }
 
-.font-digital-clock {
+/* .font-digital-clock {
   font-family: digital-7, monospace;
-}
+} */
 
 .message-box {
   display: flex;

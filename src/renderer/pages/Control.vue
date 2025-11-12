@@ -102,6 +102,13 @@
         </SButton>
       </Card>
     </div>
+    <div class="flex flex-col gap-2 text-white text-center" v-for="rule in austinRules" :key="rule">
+      <div class="flex flex-row items-center justify-center gap-1 text-[8px] text-center">
+        <span>{{ rule }}</span>
+     
+      </div>
+    </div>
+    <span class="text-white text-center text-[15px]">AUSTIN FUCKING RULES</span>
   </BaseContainer>
 </template>
 
@@ -141,6 +148,16 @@ const timersStore = useTimersStore()
 const globalStore = useGlobalStore()
 let message = ref('');
 let lastMessage = ref('');
+
+const austinRules = ref([
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+ 
+])
 
 const currentUpdate = computed(() => {
   return timersStore.updates[globalStore.currentTimer] ?? {
