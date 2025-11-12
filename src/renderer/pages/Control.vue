@@ -102,13 +102,18 @@
         </SButton>
       </Card>
     </div>
-    <div class="flex flex-col gap-2 text-white text-center" v-for="rule in austinRules" :key="rule">
-      <div class="flex flex-row items-center justify-center gap-1 text-[8px] text-center">
-        <span>{{ rule }}</span>
-     
+    <div class="scrolling-text-container overflow-hidden">
+      <div class=" flex flex-row gap-2 text-white flex-nowrap">
+        <div class="flex items-center justify-center gap-1 text-[8px] text-center whitespace-nowrap" v-for="rule in austinRules" :key="rule">
+          <span>{{ rule }}</span>
+        </div>
+        <div class="flex items-center justify-center gap-1 text-[8px] text-center whitespace-nowrap" v-for="rule in austinRules" :key="`duplicate-${rule}`">
+          <span>{{ rule }}</span>
+        </div>
       </div>
     </div>
-    <span class="text-white text-center text-[15px]">AUSTIN FUCKING RULES</span>
+    <span class="text-white text-center text-[15px] pt-4">THE FUCKING ALAMO</span>
+    <span class="text-white text-center text-[6px] pt-4">AUSTIN RULES</span>
   </BaseContainer>
 </template>
 
@@ -150,6 +155,24 @@ let message = ref('');
 let lastMessage = ref('');
 
 const austinRules = ref([
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
+  'REMEMBER',
   'REMEMBER',
   'REMEMBER',
   'REMEMBER',
@@ -254,6 +277,27 @@ function setPresetTime(minutes: number) {
 .control-buttons {
   @apply flex flex-col;
   min-width: 250px;
+}
+
+.scrolling-text-container {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.scrolling-text {
+  display: inline-flex;
+  animation: scroll-infinite 20s linear infinite;
+  will-change: transform;
+}
+
+@keyframes scroll-infinite {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 </style>
