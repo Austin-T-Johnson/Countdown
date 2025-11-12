@@ -41,7 +41,7 @@ const config: ForgeConfig = {
     new MakerZIP({}, ['darwin']),
     new MakerRpm({}),
     new MakerDeb({}),
-    new MakerDMG(),
+    // new MakerDMG(),
     new MakerFlatpak({
       options: {
         categories: ['Utility'],
