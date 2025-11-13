@@ -220,9 +220,7 @@
         <input type="checkbox" v-model="programOutput" />
         <span class="slider round"></span>
       </label>
-      <span class="text-white"
-        >Program Output {{ programOutput ? "ON" : "OFF" }}</span
-      >
+      <span class="text-white">Output Monitor </span>
     </div>
     <div
       class="flex flex-col gap-2 max-h-[400px] overflow-hidden"
