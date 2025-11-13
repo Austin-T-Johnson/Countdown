@@ -180,7 +180,7 @@
                 :key="presetMessage"
                 @click="sendPresetMessage(presetMessage, index)"
                 :class="{
-                  'bg-slate-100 !text-black': presetMessageActive === index,
+                  '!bg-slate-100 !text-black': presetMessageActive === index,
                 }"
                 class="relative max-w-[200px] min-h-[50px] flex flex-wrap bg-slate-950 rounded-xl p-6 text-white text-center items-center justify-center cursor-pointer"
               >
