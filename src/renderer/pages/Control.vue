@@ -5,7 +5,8 @@
         <TimerTabButton
           v-for="(timer, key) in settingsStore.settings.timers"
           @click="globalStore.currentTimer = key as string"
-          :active="globalStore.currentTimer === key as string">
+          :active="globalStore.currentTimer === key as string"
+        >
           {{ timer.name }}
         </TimerTabButton>
       </TimersNavigation>
@@ -16,27 +17,68 @@
           <div class="uppercase text-white flex flex-row justify-between">
             <span>Set</span>
             <div>
-              <div class="flex flex-row items-center gap-1" v-if="followingTimer">
+              <div
+                class="flex flex-row items-center gap-1"
+                v-if="followingTimer"
+              >
                 <ArrowRightIcon class="w-6 h-6 inline-flex" />
-                <span>{{ settingsStore.settings.timers[followingTimer].name }}</span>
+                <span>{{
+                  settingsStore.settings.timers[followingTimer].name
+                }}</span>
               </div>
             </div>
           </div>
-          <TimeInput @update:modelValue="timerControl.set(globalStore.currentTimer, $event);" :modelValue="currentUpdate.setSeconds" color="white"/>
+          <TimeInput
+            @update:modelValue="
+              timerControl.set(globalStore.currentTimer, $event)
+            "
+            :modelValue="currentUpdate.setSeconds"
+            color="white"
+          />
           <div class="uppercase mt-2 text-white flex flex-row justify-between">
             <span>Count</span>
             <div class="flex flex-row items-center gap-1">
-              <PlayPauseIcon v-if="followingUpdate ? followingUpdate.timerEndsAt : currentUpdate.timerEndsAt" class="w-6 h-6 inline-flex" />
-              <span>{{ followingUpdate ? followingUpdate.timerEndsAt : currentUpdate.timerEndsAt }}</span>
+              <PlayPauseIcon
+                v-if="
+                  followingUpdate
+                    ? followingUpdate.timerEndsAt
+                    : currentUpdate.timerEndsAt
+                "
+                class="w-6 h-6 inline-flex"
+              />
+              <span>{{
+                followingUpdate
+                  ? followingUpdate.timerEndsAt
+                  : currentUpdate.timerEndsAt
+              }}</span>
             </div>
-
           </div>
-          <TimeInput :modelValue="followingUpdate ? followingUpdate.countSeconds : currentUpdate.countSeconds" color="green" :disabled="true"/>
+          <TimeInput
+            :modelValue="
+              followingUpdate
+                ? followingUpdate.countSeconds
+                : currentUpdate.countSeconds
+            "
+            color="green"
+            :disabled="true"
+          />
           <div class="uppercase mt-2 text-white">Extra</div>
-          <TimeInput color="red" :modelValue="followingUpdate ? followingUpdate.extraSeconds : currentUpdate.extraSeconds" :disabled="true"/>
+          <TimeInput
+            color="red"
+            :modelValue="
+              followingUpdate
+                ? followingUpdate.extraSeconds
+                : currentUpdate.extraSeconds
+            "
+            :disabled="true"
+          />
         </Card>
         <Card class="control-buttons">
-          <SButton class="text-4xl mb-2 font-mono uppercase" @click="timerControl.start(globalStore.currentTimer)">Start</SButton>
+          <SButton
+            class="text-4xl mb-2 font-mono uppercase"
+            @click="timerControl.start(globalStore.currentTimer)"
+            >Start</SButton
+          >
           <SButton
             :disabled="currentUpdate.isReset"
             class="text-4xl mb-2 font-mono uppercase"
@@ -53,7 +95,11 @@
             Reset
           </SButton>
           <div class="flex gap-2 justify-center">
-            <Jog class="w-18" @up-click="jogMinutes(1)" @down-click="jogMinutes(-1)">
+            <Jog
+              class="w-18"
+              @up-click="jogMinutes(1)"
+              @down-click="jogMinutes(-1)"
+            >
               <template v-slot:up>
                 <PlusIcon class="w-5 h-5 inline-flex"></PlusIcon>
               </template>
@@ -62,7 +108,11 @@
               </template>
               1m
             </Jog>
-            <Jog class="w-18" @up-click="jogMinutes(5)" @down-click="jogMinutes(-5)">
+            <Jog
+              class="w-18"
+              @up-click="jogMinutes(5)"
+              @down-click="jogMinutes(-5)"
+            >
               <template v-slot:up>
                 <PlusIcon class="w-5 h-5 inline-flex"></PlusIcon>
               </template>
@@ -71,7 +121,11 @@
               </template>
               5m
             </Jog>
-            <Jog class="w-18" @up-click="jogMinutes(10)" @down-click="jogMinutes(-10)">
+            <Jog
+              class="w-18"
+              @up-click="jogMinutes(10)"
+              @down-click="jogMinutes(-10)"
+            >
               <template v-slot:up>
                 <PlusIcon class="w-5 h-5 inline-flex"></PlusIcon>
               </template>
@@ -83,24 +137,78 @@
           </div>
         </Card>
         <Card class="flex-1">
-          <div class="uppercase text-white">Message</div>
-          <div class="flex gap-2">
-            <InputWithButton class="h-8" type="text" @input="value => message = value" :model-value="message" @click="sendMessage">Send</InputWithButton>
-            <SButton tiny type="danger" @click="deleteMessage">
-              <TrashIcon class="w-5 h-5 inline-flex" />
-            </SButton>
-         
+          <div class="flex justify-between items-start">
+            <!-- Left side: Message section -->
+            <div class="flex flex-col gap-2">
+              <div class="uppercase text-white">Message</div>
+              <div class="flex gap-2">
+                <InputWithButton
+                  class="h-8"
+                  type="text"
+                  @input="(value) => (message = value)"
+                  :model-value="message"
+                  @click="sendMessage"
+                  >Send</InputWithButton
+                >
+                <SButton tiny type="danger" @click="deleteMessage">
+                  Clear
+                </SButton>
+              </div>
+            </div>
           </div>
-          <div class="flex flex-col gap-2" v-if="messageOnScreen">
-          <h1 class="text-white text-center text-[25px] pt-4">MESSAGE ON SCREEN:</h1>
-          <span class="text-[red] text-center text-[25px] pt-4 font-bold">{{ messageOnScreen }}</span>
-        </div>
+        </Card>
+        <Card class="flex-1">
+          <!-- Right side: Add Preset Message section -->
+          <div class="flex flex-col gap-2">
+            <div class="uppercase text-white">Add Preset Message</div>
+            <div class="flex gap-2">
+              <InputWithButton
+                class="h-8"
+                type="text"
+                @input="(value) => (presetMessage = value)"
+                :model-value="presetMessage"
+                @click="addPresetMessage"
+                >Add</InputWithButton
+              >
+              <SButton tiny type="danger" @click="deleteMessage">
+                Clear
+              </SButton>
+            </div>
+            <div class="flex flex-wrap gap-2 max-w-full pt-8 flex-1">
+              <div
+                v-for="presetMessage in presets"
+                :key="presetMessage"
+                @click="sendPresetMessage(presetMessage)"
+                class="relative max-w-[200px] min-h-[50px] flex flex-wrap bg-slate-950 rounded-xl p-6 text-white text-center items-center justify-center cursor-pointer"
+              >
+                {{ presetMessage }}
+                <SButton
+                  class="absolute top-0 right-0 w-6 h-6 flex items-center justify-center overflow-visible"
+                  tiny
+                  type="danger"
+                  @click="deleteMessage"
+                >
+                  <TrashIcon
+                    @click="deletePresetMessage(presetMessage)"
+                    class="inline-flex"
+                    style="
+                      width: 1.3rem;
+                      height: 1.3rem;
+                      min-width: 1.3rem;
+                      min-height: 1.3rem;
+                    "
+                  />
+                </SButton>
+              </div>
+            </div>
+          </div>
         </Card>
       </div>
       <Card class="presets inline-flex gap-2 overflow-x-auto">
         <SButton
           v-for="(preset, index) in settingsStore.settings.presets"
-          :key="index" type="info"
+          :key="index"
+          type="info"
           @click="setPresetTime(preset)"
         >
           {{ preset }}
@@ -109,106 +217,127 @@
     </div>
     <div class="flex items-center gap-2">
       <label class="switch">
-        <input type="checkbox" v-model="programOutput">
-        <span class="slider round"></span> 
+        <input type="checkbox" v-model="programOutput" />
+        <span class="slider round"></span>
       </label>
-      <span class="text-white">Program Output {{ programOutput ? 'ON' : 'OFF' }}</span>   
+      <span class="text-white"
+        >Program Output {{ programOutput ? "ON" : "OFF" }}</span
+      >
     </div>
-    <div class="flex flex-col gap-2 max-h-[400px] overflow-hidden" v-if="programOutput">
+    <div
+      class="flex flex-col gap-2 max-h-[400px] overflow-hidden"
+      v-if="programOutput"
+    >
       <div class="scale-50 origin-top-left">
-        <Countdown 
+        <Countdown
           v-if="globalStore.currentTimer && firstWindowId"
           :timer-id="globalStore.currentTimer"
           :window-id="firstWindowId"
         />
       </div>
     </div>
-
-   </BaseContainer>
+  </BaseContainer>
 </template>
 
 <script lang="ts" setup>
-import {computed, onMounted, ref, watch} from 'vue'
-import {ipcRenderer} from 'electron'
-import Card from '../components/Card.vue'
-import SButton from '../components/SButton.vue'
-import TimeInput from '../components/TimeInput.vue'
+import { computed, onMounted, ref, watch } from "vue";
+import { ipcRenderer } from "electron";
+import Card from "../components/Card.vue";
+import SButton from "../components/SButton.vue";
+import TimeInput from "../components/TimeInput.vue";
 import Jog from "../components/Jog.vue";
-import { PlayPauseIcon, PlusIcon, MinusIcon, TrashIcon, ArrowRightIcon } from '@heroicons/vue/24/outline';
-import dayjs from 'dayjs'
-import duration from 'dayjs/plugin/duration'
-import {TimerControl} from "../TimerControl";
+import {
+  PlayPauseIcon,
+  PlusIcon,
+  MinusIcon,
+  TrashIcon,
+  ArrowRightIcon,
+} from "@heroicons/vue/24/outline";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
+import { TimerControl } from "../TimerControl";
 import Display = Electron.Display;
 import InputWithButton from "../components/InputWithButton.vue";
 // @ts-ignore
-import {Howl} from "howler";
+import { Howl } from "howler";
 import TimerTabButton from "../components/TimerTabButton.vue";
 import TimersNavigation from "../components/TimersNavigation.vue";
-import {useTimersStore} from '../stores/timers.ts'
-import TopBar from '../components/TopBar.vue'
-import BaseContainer from '../components/BaseContainer.vue'
-import {useSettingsStore} from '../stores/settings.ts'
-import {useGlobalStore} from '../stores/global.ts'
-import Countdown from './Countdown.vue'
+import { useTimersStore } from "../stores/timers.ts";
+import TopBar from "../components/TopBar.vue";
+import BaseContainer from "../components/BaseContainer.vue";
+import { useSettingsStore } from "../stores/settings.ts";
+import { useGlobalStore } from "../stores/global.ts";
+import Countdown from "./Countdown.vue";
 
-dayjs.extend(duration)
+dayjs.extend(duration);
 const timerControl = new TimerControl();
 
 defineOptions({
-  name: 'index',
+  name: "index",
 });
 
 let screens = ref<Display[]>([]);
-const settingsStore = useSettingsStore()
-const timersStore = useTimersStore()
-const globalStore = useGlobalStore()
-let message = ref('');
-let lastMessage = ref('');
-const messageOnScreen = ref('');
+const settingsStore = useSettingsStore();
+const timersStore = useTimersStore();
+const globalStore = useGlobalStore();
+let message = ref("");
+let lastMessage = ref("");
+const messageOnScreen = ref("");
 const programOutput = ref(true);
+const presets = ref([]);
+const presetMessage = ref("");
 
-const toggleProgramOutput = () => {
-  programOutput.value = !programOutput.value;
-}
+const addPresetMessage = () => {
+  presets.value.push(presetMessage.value);
+  presetMessage.value = "";
+};
+
+const deletePresetMessage = (presetMessage: string) => {
+  presets.value = presets.value.filter((p: string) => p !== presetMessage);
+};
 
 const currentUpdate = computed(() => {
-  return timersStore.updates[globalStore.currentTimer] ?? {
-    setSeconds: 0,
-    countSeconds: 0,
-    currentSeconds: 0,
-    extraSeconds: 0,
-    secondsSetOnCurrentTimer: 0,
-    isCountingUp: false,
-    isExpiring: false,
-    isReset: true,
-    isRunning: false,
-    timerEndsAt: null,
-  }
-})
+  return (
+    timersStore.updates[globalStore.currentTimer] ?? {
+      setSeconds: 0,
+      countSeconds: 0,
+      currentSeconds: 0,
+      extraSeconds: 0,
+      secondsSetOnCurrentTimer: 0,
+      isCountingUp: false,
+      isExpiring: false,
+      isReset: true,
+      isRunning: false,
+      timerEndsAt: null,
+    }
+  );
+});
 const followingUpdate = computed(() => {
-  const followTimer = settingsStore.settings.timers[globalStore.currentTimer]?.followTimer
+  const followTimer =
+    settingsStore.settings.timers[globalStore.currentTimer]?.followTimer;
   if (currentUpdate.value.isReset && followTimer) {
-    return timersStore.updates[followTimer]
+    return timersStore.updates[followTimer];
   }
 
-  return null
-})
+  return null;
+});
 const followingTimer = computed(() => {
-  const followTimer = settingsStore.settings.timers[globalStore.currentTimer]?.followTimer
+  const followTimer =
+    settingsStore.settings.timers[globalStore.currentTimer]?.followTimer;
   if (currentUpdate.value.isReset && followTimer) {
-    return followTimer
+    return followTimer;
   }
 
-  return null
-})
+  return null;
+});
 
 const firstWindowId = computed(() => {
-  if (!globalStore.currentTimer) return null
-  const timer = settingsStore.settings.timers[globalStore.currentTimer]
-  if (!timer || !timer.windows) return null
-  const windowIds = Object.keys(timer.windows)
-  return windowIds.length > 0 ? windowIds[0] : null
-})
+  if (!globalStore.currentTimer) return null;
+  const timer = settingsStore.settings.timers[globalStore.currentTimer];
+  if (!timer || !timer.windows) return null;
+  const windowIds = Object.keys(timer.windows);
+  return windowIds.length > 0 ? windowIds[0] : null;
+});
 
 function sendMessage() {
   timerControl.sendMessage(globalStore.currentTimer, message.value);
@@ -216,36 +345,45 @@ function sendMessage() {
   messageOnScreen.value = message.value;
 }
 
-const deleteMessage = () => {
-  timerControl.sendMessage(globalStore.currentTimer, '');
-  message.value = '';
-  messageOnScreen.value = '';
-}
+const sendPresetMessage = (presetMessage: string) => {
+  timerControl.sendMessage(globalStore.currentTimer, presetMessage);
+  lastMessage.value = presetMessage;
+  messageOnScreen.value = presetMessage;
+};
 
-watch(() => settingsStore.settings.timers, (timers) => {
-  if (globalStore.currentTimer === undefined) {
-    const firstTimer = Object.keys(timers)[0]
-    globalStore.currentTimer = firstTimer
+const deleteMessage = () => {
+  timerControl.sendMessage(globalStore.currentTimer, "");
+  message.value = "";
+  messageOnScreen.value = "";
+};
+
+watch(
+  () => settingsStore.settings.timers,
+  (timers) => {
+    if (globalStore.currentTimer === undefined) {
+      const firstTimer = Object.keys(timers)[0];
+      globalStore.currentTimer = firstTimer;
+    }
   }
-})
+);
 
 onMounted(async () => {
-  const firstTimer = Object.keys(settingsStore.settings.timers)[0]
-  globalStore.currentTimer = firstTimer
+  const firstTimer = Object.keys(settingsStore.settings.timers)[0];
+  globalStore.currentTimer = firstTimer;
 
-  screens.value = await ipcRenderer.invoke('screens:get');
+  screens.value = await ipcRenderer.invoke("screens:get");
 
-  ipcRenderer.on('screens-updated', async () => {
-    screens.value = await ipcRenderer.invoke('screens:get');
-  })
+  ipcRenderer.on("screens-updated", async () => {
+    screens.value = await ipcRenderer.invoke("screens:get");
+  });
 
-  ipcRenderer.on('audio:play', async (event, audioFile, mimeType) => {
+  ipcRenderer.on("audio:play", async (event, audioFile, mimeType) => {
     const sound = new Howl({
       src: `data:${mimeType};base64,${audioFile}`,
     });
 
-    sound.play()
-  })
+    sound.play();
+  });
 });
 
 function jogMinutes(minutes: number) {
@@ -260,17 +398,15 @@ function setPresetTime(minutes: number) {
   const secondsPerMinute = 60;
   timerControl.set(globalStore.currentTimer, minutes * secondsPerMinute);
 }
-
 </script>
 
 <style scoped>
-
 .countdown-tab {
   @apply flex flex-col gap-2;
 }
 
 .clock-setup {
-  @apply flex flex-col min-w-fit
+  @apply flex flex-col min-w-fit;
 }
 
 .control-buttons {
@@ -321,7 +457,7 @@ function setPresetTime(minutes: number) {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  transition: .4s;
+  transition: 0.4s;
 }
 
 .slider:before {
@@ -332,7 +468,7 @@ function setPresetTime(minutes: number) {
   left: 4px;
   bottom: 4px;
   background-color: white;
-  transition: .4s;
+  transition: 0.4s;
 }
 
 input:checked + .slider {
@@ -354,5 +490,4 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
-
 </style>
