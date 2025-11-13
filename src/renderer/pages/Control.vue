@@ -89,7 +89,12 @@
             <SButton tiny type="danger" @click="deleteMessage">
               <TrashIcon class="w-5 h-5 inline-flex" />
             </SButton>
+         
           </div>
+          <div class="flex flex-col gap-2" v-if="messageOnScreen">
+          <h1 class="text-white text-center text-[25px] pt-4">MESSAGE ON SCREEN:</h1>
+          <span class="text-[red] text-center text-[25px] pt-4 font-bold">{{ messageOnScreen }}</span>
+        </div>
         </Card>
       </div>
       <Card class="presets inline-flex gap-2 overflow-x-auto">
@@ -102,19 +107,24 @@
         </SButton>
       </Card>
     </div>
-    <div class="scrolling-text-container overflow-hidden">
-      <div class=" flex flex-row gap-2 text-white flex-nowrap">
-        <div class="flex items-center justify-center gap-1 text-[8px] text-center whitespace-nowrap" v-for="rule in austinRules" :key="rule">
-          <span>{{ rule }}</span>
-        </div>
-        <div class="flex items-center justify-center gap-1 text-[8px] text-center whitespace-nowrap" v-for="rule in austinRules" :key="`duplicate-${rule}`">
-          <span>{{ rule }}</span>
-        </div>
+    <div class="flex items-center gap-2">
+      <label class="switch">
+        <input type="checkbox" v-model="programOutput">
+        <span class="slider round"></span> 
+      </label>
+      <span class="text-white">Program Output {{ programOutput ? 'ON' : 'OFF' }}</span>   
+    </div>
+    <div class="flex flex-col gap-2 max-h-[400px] overflow-hidden" v-if="programOutput">
+      <div class="scale-50 origin-top-left">
+        <Countdown 
+          v-if="globalStore.currentTimer && firstWindowId"
+          :timer-id="globalStore.currentTimer"
+          :window-id="firstWindowId"
+        />
       </div>
     </div>
-    <span class="text-white text-center text-[15px] pt-4">THE FUCKING ALAMO</span>
-    <span class="text-white text-center text-[6px] pt-4">AUSTIN RULES</span>
-  </BaseContainer>
+
+   </BaseContainer>
 </template>
 
 <script lang="ts" setup>
@@ -139,6 +149,7 @@ import TopBar from '../components/TopBar.vue'
 import BaseContainer from '../components/BaseContainer.vue'
 import {useSettingsStore} from '../stores/settings.ts'
 import {useGlobalStore} from '../stores/global.ts'
+import Countdown from './Countdown.vue'
 
 dayjs.extend(duration)
 const timerControl = new TimerControl();
@@ -153,34 +164,12 @@ const timersStore = useTimersStore()
 const globalStore = useGlobalStore()
 let message = ref('');
 let lastMessage = ref('');
+const messageOnScreen = ref('');
+const programOutput = ref(true);
 
-const austinRules = ref([
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
-  'REMEMBER',
- 
-])
+const toggleProgramOutput = () => {
+  programOutput.value = !programOutput.value;
+}
 
 const currentUpdate = computed(() => {
   return timersStore.updates[globalStore.currentTimer] ?? {
@@ -213,14 +202,24 @@ const followingTimer = computed(() => {
   return null
 })
 
+const firstWindowId = computed(() => {
+  if (!globalStore.currentTimer) return null
+  const timer = settingsStore.settings.timers[globalStore.currentTimer]
+  if (!timer || !timer.windows) return null
+  const windowIds = Object.keys(timer.windows)
+  return windowIds.length > 0 ? windowIds[0] : null
+})
+
 function sendMessage() {
   timerControl.sendMessage(globalStore.currentTimer, message.value);
   lastMessage.value = message.value;
+  messageOnScreen.value = message.value;
 }
 
 const deleteMessage = () => {
   timerControl.sendMessage(globalStore.currentTimer, '');
   message.value = '';
+  messageOnScreen.value = '';
 }
 
 watch(() => settingsStore.settings.timers, (timers) => {
@@ -298,6 +297,62 @@ function setPresetTime(minutes: number) {
   to {
     transform: translateX(-50%);
   }
+}
+
+/* Toggle Switch Styles */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  @apply bg-green-500;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px rgb(34, 197, 94);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 
 </style>

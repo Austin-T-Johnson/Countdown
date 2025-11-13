@@ -13,6 +13,7 @@
     class="h-full flex justify-center flex-col drag"
   >
     <div
+      v-if="messageUpdate.message"
       :class="{
         'message-box': true,
         'message-box-fixed-height': settings.messageBoxFixedHeight || !!messageUpdate.message,
@@ -48,7 +49,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onMounted, ref, toRaw } from 'vue'
+import { computed, onMounted, ref, toRaw, watch } from 'vue'
 import {ipcRenderer} from 'electron'
 import dayjs from 'dayjs'
 import duration from 'dayjs/plugin/duration'
@@ -63,6 +64,16 @@ import Clock from "../components/Clock.vue";
 import {IpcGetWindowSettingsArgs} from "../../common/IpcInterfaces";
 import TimersSettings from './TimersSettings.vue'
 import { Timer } from '../../main/Utilities/Timer.ts'
+
+interface Props {
+  timerId?: string | null
+  windowId?: string | null
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  timerId: null,
+  windowId: null
+})
 
 dayjs.extend(duration)
 
@@ -89,9 +100,20 @@ let update = computed<TimerEngineUpdate>(() => {
   }
   return defaultValue
 })
-let messageUpdate = ref<MessageUpdate>({
-  timerId: null,
-  message: null,
+let allMessages = ref<MessageUpdate[]>([])
+let messageUpdate = computed<MessageUpdate>(() => {
+  // Find the most recent message for this timer
+  if (!timerId.value) {
+    return { timerId: null, message: null }
+  }
+  const messagesForThisTimer = allMessages.value.filter(msg => msg.timerId === timerId.value)
+  if (messagesForThisTimer.length > 0) {
+    return messagesForThisTimer[messagesForThisTimer.length - 1]
+  }
+  return {
+    timerId: null,
+    message: null,
+  }
 })
 let settings = ref<WindowSettings>(DEFAULT_WINDOW_SETTINGS)
 let timerSettings = ref<TimerSettings>(DEFAULT_TIMER_SETTINGS)
@@ -152,32 +174,59 @@ const cssVars = computed(() => {
 });
 
 const queryString = new URLSearchParams(window.location.search);
-const timerId = ref(queryString.get('timer'))
-const windowId = ref(queryString.get('window'))
+const timerId = ref(props.timerId || queryString.get('timer'))
+const windowId = ref(props.windowId || queryString.get('window'))
 
-onMounted(async () => {
-
+const loadSettings = async () => {
+  if (!timerId.value) return
+  
   const args: IpcGetWindowSettingsArgs = {
     timerId: timerId.value,
     windowId: windowId.value,
   }
   settings.value = await ipcRenderer.invoke('settings:get-window', args)
   timerSettings.value = await ipcRenderer.invoke('settings:get', `timers.${timerId.value}`)
+}
 
-  ipcRenderer.on('update', (event, timerId: string, update: TimerEngineUpdate) => {
-    updates.value[timerId] = update;
-  })
-  ipcRenderer.on('message', (event, arg) => {
-    console.log(arg);
-    messageUpdate.value = arg;
-  })
+watch(() => props.timerId, (newTimerId) => {
+  if (newTimerId) {
+    timerId.value = newTimerId
+    loadSettings()
+  }
+}, { immediate: true })
+
+// Set up IPC listeners immediately, before onMounted
+ipcRenderer.on('update', (event, updateTimerId: string, update: TimerEngineUpdate) => {
+  updates.value[updateTimerId] = update;
+})
+
+ipcRenderer.on('message', (event, arg: MessageUpdate) => {
+  // Store all messages, filter in computed property
+  allMessages.value.push(arg)
+  // Keep only last 10 messages to avoid memory issues
+  if (allMessages.value.length > 10) {
+    allMessages.value.shift()
+  }
+})
+
+watch(() => props.windowId, (newWindowId) => {
+  if (newWindowId) {
+    windowId.value = newWindowId
+    loadSettings()
+  }
+}, { immediate: true })
+
+onMounted(async () => {
+  await loadSettings()
   ipcRenderer.on('settings:updated', async (event, arg) => {
     settings.value = {
       ...settings.value,
       ...arg,
     }
 
-    timerSettings.value = await ipcRenderer.invoke('settings:get', `timers.${timerId.value}`)
+    if (timerId.value) {
+      timerSettings.value = await ipcRenderer.invoke('settings:get', `timers.${timerId.value}`)
+    }
   })
 });
 </script>
@@ -201,10 +250,17 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: min(18vh, 12vw, calc(min(18vh, 12vw) * var(--magic-number-font-size) / var(--message-length)));
+  font-size: max(16px, min(18vh, 12vw, calc(min(18vh, 12vw) * var(--magic-number-font-size) / var(--message-length))));
   color: white;
   text-align: center;
-  line-height: 1;
+  line-height: 1.2;
+  min-height: 40px;
+  padding: 10px;
+  box-sizing: border-box;
+  z-index: 10;
+  position: relative;
+  width: 100%;
+  word-wrap: break-word;
 }
 
 .message-box-fixed-height {

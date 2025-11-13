@@ -152,6 +152,12 @@ export class TimersOrchestrator {
   }
 
   _timerEngineMessageUpdate(timerId: string, update: MessageUpdate) {
+    // Send to main window (for embedded Countdown component)
+    const mainBrowserWindow = this.app.mainWindowHandler.browserWindow;
+    if (mainBrowserWindow) {
+      mainBrowserWindow.webContents.send('message', update);
+    }
+    // Send to countdown windows
     Object.keys(this.timers[timerId].windows).forEach(windowId => {
       const browserWinHandler = this.timers[timerId].windows[windowId];
       browserWinHandler.browserWindow.webContents.send('message', update);
