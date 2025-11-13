@@ -176,9 +176,12 @@
             </div>
             <div class="flex flex-wrap gap-2 max-w-full pt-8 flex-1">
               <div
-                v-for="presetMessage in presets"
+                v-for="(presetMessage, index) in presets"
                 :key="presetMessage"
-                @click="sendPresetMessage(presetMessage)"
+                @click="sendPresetMessage(presetMessage, index)"
+                :class="{
+                  'bg-slate-100 !text-black': presetMessageActive === index,
+                }"
                 class="relative max-w-[200px] min-h-[50px] flex flex-wrap bg-slate-950 rounded-xl p-6 text-white text-center items-center justify-center cursor-pointer"
               >
                 {{ presetMessage }}
@@ -290,8 +293,21 @@ const addPresetMessage = () => {
   presetMessage.value = "";
 };
 
+const presetMessageActive = ref<number | null>(null);
+
 const deletePresetMessage = (presetMessage: string) => {
+  const indexToDelete = presets.value.indexOf(presetMessage);
   presets.value = presets.value.filter((p: string) => p !== presetMessage);
+  // If the deleted preset was active, clear the active state
+  if (presetMessageActive.value === indexToDelete) {
+    presetMessageActive.value = null;
+  } else if (
+    presetMessageActive.value !== null &&
+    presetMessageActive.value > indexToDelete
+  ) {
+    // Adjust the active index if a preset before it was deleted
+    presetMessageActive.value = presetMessageActive.value - 1;
+  }
 };
 
 const currentUpdate = computed(() => {
@@ -343,16 +359,18 @@ function sendMessage() {
   messageOnScreen.value = message.value;
 }
 
-const sendPresetMessage = (presetMessage: string) => {
+const sendPresetMessage = (presetMessage: string, index: number) => {
   timerControl.sendMessage(globalStore.currentTimer, presetMessage);
   lastMessage.value = presetMessage;
   messageOnScreen.value = presetMessage;
+  presetMessageActive.value = index;
 };
 
 const deleteMessage = () => {
   timerControl.sendMessage(globalStore.currentTimer, "");
   message.value = "";
   messageOnScreen.value = "";
+  presetMessageActive.value = null;
 };
 
 watch(
